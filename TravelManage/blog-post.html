@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Blog Post | Brittany Carter – Travel Designer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- NOTE: For true per-post SEO (title/description),
+       you'd set these dynamically on the server.
+       Here we keep a generic viewer meta. -->
+  <meta name="description" content="Travel blog post by Brittany Carter, Travel Designer. Learn about future trip ideas, destinations, and planning tips." />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">
+      <span class="logo-mark">BC</span>
+      <div class="logo-text">
+        <span class="logo-name">Brittany Carter</span>
+        <span class="logo-role">Travel Designer</span>
+      </div>
+    </div>
+
+    <nav class="main-nav" id="mainNav">
+      <a href="index.html#hero">Home</a>
+      <a href="index.html#tools">Travel Tools</a>
+      <a href="blog.html">Daily Blog</a>
+      <a href="index.html#destinations">Destinations</a>
+      <a href="index.html#contact">Contact</a>
+    </nav>
+
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <main class="blog-view-shell">
+    <section class="blog-main-layout">
+      <article class="blog-post-full" id="blogPostFull">
+        <p class="blog-index-category" id="postCategory">Travel Blog</p>
+        <h1 id="postTitle">Loading post...</h1>
+        <p class="blog-index-meta" id="postMeta"></p>
+
+        <p class="blog-intro" id="postIntro">
+          <!-- intro will go here -->
+        </p>
+
+        <div class="blog-post-image" id="postImageContainer" style="display: none;">
+          <img id="postImage" src="" alt="" />
+        </div>
+
+        <div class="blog-viewer-body" id="postContent">
+          <!-- full HTML content will go here -->
+        </div>
+
+        <div class="blog-cta">
+          <h3>Want a trip like this in your future?</h3>
+          <p>
+            Tell me your ideal dates, budget range, and travel style,
+            and I’ll design a version tailored just for you.
+          </p>
+          <a href="index.html#contact" class="btn primary">Start My Trip Inquiry</a>
+        </div>
+
+        <p class="blog-back-link">
+          <a href="blog.html">← Back to all blog posts</a>
+        </p>
+      </article>
+
+      <!-- Optional sidebar: quick links to other posts -->
+      <aside class="blog-sidebar">
+        <h2 class="sidebar-title">More Posts</h2>
+        <ul class="sidebar-list" id="blogSidebarList">
+          <!-- JS will render links here -->
+        </ul>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© <span id="year"></span> Brittany Carter – Travel Designer. All rights reserved.</p>
+  </footer>
+
+  <script src="blog-posts.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+
+      const titleEl = document.getElementById("postTitle");
+      const metaEl = document.getElementById("postMeta");
+      const introEl = document.getElementById("postIntro");
+      const contentEl = document.getElementById("postContent");
+      const categoryEl = document.getElementById("postCategory");
+      const sidebarList = document.getElementById("blogSidebarList");
+      const imageContainer = document.getElementById("postImageContainer");
+      const imageEl = document.getElementById("postImage");
+
+      if (!Array.isArray(BLOG_POSTS) || BLOG_POSTS.length === 0) {
+        titleEl.textContent = "No blog posts found.";
+        return;
+      }
+
+      const posts = [...BLOG_POSTS].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      function formatDate(dateStr) {
+        const d = new Date(dateStr);
+        if (isNaN(d)) return dateStr;
+        return d.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric"
+        });
+      }
+
+      let post = posts[0];
+      if (id) {
+        const match = posts.find((p) => p.id === id);
+        if (match) post = match;
+      }
+
+      // Render main post
+      categoryEl.textContent = post.category || "Travel Blog";
+      titleEl.textContent = post.title;
+
+      const metaPieces = [];
+      if (post.date) metaPieces.push(formatDate(post.date));
+      if (post.readTime) metaPieces.push(post.readTime);
+      metaEl.innerHTML = metaPieces.length
+        ? metaPieces.map((t, i) => (i === 0 ? `<span>${t}</span>` : `<span> · ${t}</span>`)).join("")
+        : "";
+
+      introEl.textContent = post.intro || post.excerpt || "";
+      contentEl.innerHTML = post.contentHtml || "";
+
+      // Display post image if available
+      // After you determine `post` (you already do this)
+
+if (post.image) {
+  imageEl.src = post.image;
+  imageEl.alt = post.imageAlt || post.title;
+  imageContainer.style.display = "block";
+} else {
+  imageContainer.style.display = "none";
+}
+
+      // Render sidebar links
+      posts.forEach((p) => {
+        if (p.id === post.id) return;
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <a href="blog-view.html?id=${encodeURIComponent(p.id)}">
+            <span class="sidebar-post-title">${p.title}</span>
+            <span class="sidebar-post-meta">${formatDate(p.date)}</span>
+          </a>
+        `;
+        sidebarList.appendChild(li);
+      });
+
+      // Optional: update document title with post title for UX (not full SEO)
+      document.title = post.title + " | Brittany Carter – Travel Designer";
+    });
+  </script>
+</body>
+</html>
